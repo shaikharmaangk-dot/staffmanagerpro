@@ -6,9 +6,9 @@ A static, browser-based staff management prototype. The site can be hosted with 
 
 1. Open the repository **Settings**.
 2. Choose **Pages** in the sidebar.
-3. Under **Build and deployment**, choose **Deploy from a branch**.
-4. Select branch `main` and folder `/ (root)`, then save.
-5. Wait for GitHub Pages to finish publishing. The URL will be shown on the Pages settings screen, usually `https://shaikharmaangk-dot.github.io/staffmanagerpro/`.
+3. Under **Build and deployment**, choose **GitHub Actions** as the source and save if prompted.
+4. A push to `main` starts the deployment workflow automatically.
+5. After the workflow succeeds, open `https://shaikharmaangk-dot.github.io/staffmanagerpro/`.
 
 ## Important limitations
 
