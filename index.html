@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Staff Manager Pro - Zepto Vendor Management</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        zepto: {
+                            purple: '#3b0764',
+                            magenta: '#e11d48',
+                            amber: '#f59e0b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+    <link rel="manifest" href="./manifest.webmanifest">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="icon" href="./icon.svg" type="image/svg+xml">
+</head>
+<body class="h-full text-slate-800 antialiased bg-slate-100 flex flex-col">
+
+    <!-- APP CONTAINER -->
+    <div id="app" class="min-h-screen flex flex-col"></div>
+
+    <!-- MAIN JAVASCRIPT APPLICATION -->
+    <script>
+        // ==========================================
+        // 1. STATE MANAGEMENT & DATA PERSISTENCE
+        // ==========================================
+        const DB_KEY = 'STORE_STAFF_MANAGER_PRO_DB_V1';
+
+        // Translations Dictionary
+        const TRANSLATIONS = {
+            en: {
+                appName: "Store Staff Manager Pro",
+                zeptoVendor: "Zepto Darkstore #104 - Powai",
+                adminPortal: "Admin Portal",
+                employeePortal: "Employee Portal",
+                login: "Log In",
+                logout: "Log Out",
+                switchPortal: "Switch Portal",
+                langToggle: "हिंदी",
+                dashboard: "Dashboard",
+                employees: "Employees",
+                attendance: "Attendance",
+                complaints: "Help & Issues",
+                wagesLedger: "Wage Ledger",
+                accounting: "Store P&L",
+                notifications: "Notifications",
+                reports: "Reports & CSV",
+                checkIn: "Check In",
+                checkOut: "Check Out",
+                reportProblem: "Report a Problem / समस्या बताएं",
+                activeEmployees: "Active Staff",
+                presentToday: "Present Today",
+                workingNow: "On Floor Now",
+                openComplaints: "Open Complaints",
+                unreadAlerts: "Unread Alerts",
+                dailyWageRate: "Daily Wage Rate",
+                grossEarnings: "Gross Earned",
+                advanceTaken: "Advance Taken",
+                netPayable: "Net Payable",
+                status: "Status",
+                action: "Action",
+                submit: "Submit",
+                cancel: "Cancel",
+                ticketNo: "Ticket #",
+                priority: "Priority",
+                category: "Category",
+                description: "Description",
+                reply: "Reply",
+                internalNotes: "Internal Admin Note (Private)",
+                markResolved: "Mark Resolved",
+                approve: "Approve",
+                reject: "Reject",
+                date: "Date",
+                shift: "Shift",
+                time: "Time",
+                location: "Location",
+                filter: "Filter",
+                search: "Search staff, tickets...",
+                downloadCsv: "Export CSV",
+                quickActions: "Quick Actions",
+                addEmployee: "+ Add Employee",
+                recordAdvance: "+ Record Advance",
+                addExpense: "+ Record Expense",
+                storeIncome: "+ Store Settlement"
+            },
+            hi: {
+                appName: "स्टोर स्टाफ मैनेजर प्रो",
+                zeptoVendor: "जेप्टो डार्कस्टोर #104 - पवई",
+                adminPortal: "एडमिन पोर्टल",
+                employeePortal: "कर्मचारी पोर्टल",
+                login: "लॉग इन करें",
+                logout: "लॉग आउट",
+                switchPortal: "पोर्टल बदलें",
+                langToggle: "English",
+                dashboard: "डैशबोर्ड",
+                employees: "कर्मचारी",
+                attendance: "उपस्थिति",
+                complaints: "सहायता एवं शिकायतें",
+                wagesLedger: "वेतन लेजर",
+                accounting: "स्टोर खाता (P&L)",
+                notifications: "सूचनाएं",
+                reports: "रिपोर्ट और CSV",
+                checkIn: "चेक-इन करें",
+                checkOut: "चेक-आउट करें",
+                reportProblem: "समस्या बताएं / Report Issue",
+                activeEmployees: "कुल कर्मचारी",
+                presentToday: "आज उपस्थित",
+                workingNow: "अभी कार्यरत",
+                openComplaints: "खुली शिकायतें",
+                unreadAlerts: "अपठित अलर्ट",
+                dailyWageRate: "दैनिक वेतन दर",
+                grossEarnings: "कुल कमाई",
+                advanceTaken: "अग्रिम भुगतान",
+                netPayable: "शेष देय राशि",
+                status: "स्थिति",
+                action: "कार्रवाई",
+                submit: "जमा करें",
+                cancel: "रद्द करें",
+                ticketNo: "टिकट संख्या",
+                priority: "प्राथमिकता",
+                category: "श्रेणी",
+                description: "विवरण",
+                reply: "उत्तर दें",
+                internalNotes: "आंतरिक एडमिन नोट (निजी)",
+                markResolved: "हल के रूप में चिह्नित करें",
+                approve: "स्वीकृत करें",
+                reject: "अस्वीकृत करें",
+                date: "तारीख",
+                shift: "शिफ्ट",
+                time: "समय",
+                location: "स्थान",
+                filter: "फ़िल्टर",
+                search: "खोजें...",
+                downloadCsv: "CSV डाउनलोड करें",
+                quickActions: "त्वरित कार्रवाई",
+                addEmployee: "+ नया कर्मचारी",
+                recordAdvance: "+ अग्रिम दर्ज करें",
+                addExpense: "+ खर्च दर्ज करें",
+                storeIncome: "+ स्टोर आय दर्ज करें"
+            }
+        };
+
+        // Initialize Default State
+        function getInitialData() {
+            // Generate 80 sample employees
+            const roles = ['Picker', 'Packer', 'Rider', 'Inventory Associate', 'Shift Supervisor'];
+            const shifts = ['Morning (06:00 AM - 02:00 PM)', 'Evening (02:00 PM - 10:00 PM)', 'Night (10:00 PM - 06:00 AM)'];
+            const names = [
+                "Rahul Sharma", "Amit Kumar", "Priya Verma", "Suresh Yadav", "Vikram Singh",
+                "Pooja Patel", "Rohan Gupta", "Deepak Mishra", "Anjali Das", "Rajesh Khan",
+                "Manish Tiwari", "Kavita Reddy", "Sunil Joshi", "Nehal Shah", "Sanjay Raut",
+                "Aarti Mehra", "Gaurav Sen", "Karan Malhotra", "Ritu Chauhan", "Vijay Naik"
+            ];
+
+            const initialEmployees = [];
+            for (let i = 1; i <= 82; i++) {
+                const nameIndex = (i - 1) % names.length;
+                const role = roles[i % roles.length];
+                const shift = shifts[i % shifts.length];
+                const empId = `EMP-${1000 + i}`;
+                const dailyWage = 650 + (i % 5) * 50; // ₹650 to ₹850
+
+                initialEmployees.push({
+                    id: empId,
+                    name: `${names[nameIndex]} ${i > 20 ? '(' + i + ')' : ''}`,
+                    mobile: `98765${10000 + i}`,
+                    role: role,
+                    shift: shift,
+                    dailyWage: dailyWage,
+                    status: 'Active',
+                    joiningDate: '2025-01-15',
+                    pin: '1234'
+                });
+            }
+
+            // Sample Initial Attendance for Today
+            const todayStr = new Date().toISOString().split('T')[0];
+            const initialAttendance = [];
+            for (let i = 0; i < 60; i++) {
+                const emp = initialEmployees[i];
+                initialAttendance.push({
+                    id: `ATT-${100 + i}`,
+                    employeeId: emp.id,
+                    employeeName: emp.name,
+                    date: todayStr,
+                    checkIn: '06:02 AM',
+                    checkOut: i < 40 ? '02:00 PM' : null,
+                    status: i < 40 ? 'Completed' : 'Working',
+                    approvalStatus: 'Approved',
+                    location: 'Powai Darkstore (Geofenced Valid)'
+                });
+            }
+
+            // Sample Complaints
+            const initialComplaints = [
+                {
+                    id: 'ISS-2026-0001',
+                    employeeId: 'EMP-1002',
+                    employeeName: 'Amit Kumar',
+                    category: 'Attendance Marked Incorrectly',
+                    priority: 'High',
+                    status: 'Open',
+                    title: 'Check-out missed due to scanner malfunction',
+                    description: 'I checked out at 2:05 PM but app showed network timeout. Please mark my check out.',
+                    createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
+                    assignedTo: 'Admin (Vendor Manager)',
+                    messages: [
+                        { sender: 'employee', text: 'I checked out at 2:05 PM but app showed network timeout. Please mark my check out.', timestamp: '10:30 AM' },
+                        { sender: 'admin', text: 'Checking security camera records at darkstore gate.', timestamp: '11:15 AM' }
+                    ],
+                    internalNotes: 'Checked CCTV camera 4. Worker left store at 02:04 PM. Valid claim.'
+                },
+                {
+                    id: 'ISS-2026-0002',
+                    employeeId: 'EMP-1005',
+                    employeeName: 'Vikram Singh',
+                    category: 'Advance Payment Problem',
+                    priority: 'Urgent',
+                    status: 'New',
+                    title: 'Advance request of ₹2000 for medical emergency',
+                    description: 'Need urgent ₹2000 advance deducted from next week wage. Emergency at home.',
+                    createdAt: new Date(Date.now() - 3600000 * 1).toISOString(),
+                    assignedTo: 'Admin (Vendor Manager)',
+                    messages: [
+                        { sender: 'employee', text: 'Need urgent ₹2000 advance deducted from next week wage. Emergency at home.', timestamp: '01:45 PM' }
+                    ],
+                    internalNotes: ''
+                }
+            ];
+
+            // Sample Financial Ledger Transactions
+            const initialLedger = [
+                { id: 'TXN-501', type: 'Advance', employeeId: 'EMP-1002', employeeName: 'Amit Kumar', amount: 1000, date: todayStr, mode: 'UPI', note: 'Emergency advance' },
+                { id: 'TXN-502', type: 'WagePayment', employeeId: 'EMP-1001', employeeName: 'Rahul Sharma', amount: 3500, date: todayStr, mode: 'Bank Transfer', note: 'Weekly wage disbursement' }
+            ];
+
+            // Sample Store Expenses & Income
+            const initialStorePnl = [
+                { id: 'EXP-101', type: 'Expense', category: 'Supplies', title: 'Packing Tapes & Bags', amount: 4500, date: todayStr, mode: 'Cash' },
+                { id: 'EXP-102', type: 'Expense', category: 'Utilities', title: 'Tea & Snacks for Night Shift', amount: 1200, date: todayStr, mode: 'UPI' },
+                { id: 'INC-201', type: 'Income', category: 'Zepto Weekly Settlement', title: 'Vendor Order Payout', amount: 285000, date: todayStr, mode: 'Bank Transfer' }
+            ];
+
+            // Sample Notifications
+            const initialNotifications = [
+                { id: 'NOTIF-1', recipientRole: 'admin', title: 'NEW EMPLOYEE COMPLAINT', message: 'Vikram Singh (EMP-1005) filed urgent complaint: Advance request ₹2000', timestamp: '1 hour ago', read: false, link: 'ISS-2026-0002' },
+                { id: 'NOTIF-2', recipientRole: 'EMP-1001', title: 'WAGE PAYMENT RECORDED', message: '₹3500 credited to your account via Bank Transfer', timestamp: '3 hours ago', read: false }
+            ];
+
+            return {
+                employees: initialEmployees,
+                attendance: initialAttendance,
+                complaints: initialComplaints,
+                ledger: initialLedger,
+                storePnl: initialStorePnl,
+                notifications: initialNotifications
+            };
+        }
+
+        class AppStore {
+            constructor() {
+                const stored = localStorage.getItem(DB_KEY);
+                if (stored) {
+                    try {
+                        this.state = JSON.parse(stored);
+                    } catch (e) {
+                        this.state = getInitialData();
+                    }
+                } else {
+                    this.state = getInitialData();
+                    this.save();
+                }
+
+                // Active Session State
+                this.currentLang = 'en'; // 'en' or 'hi'
+                this.currentUser = null; // { role: 'admin' | 'employee', data: employeeObj | adminObj }
+                this.activeTab = 'dashboard';
+                this.searchQuery = '';
+                this.selectedComplaintId = null;
+            }
+
+            save() {
+                localStorage.setItem(DB_KEY, JSON.stringify(this.state));
+            }
+
+            setLanguage(lang) {
+                this.currentLang = lang;
+                renderApp();
+            }
+
+            loginAdmin(email, password) {
+                if ((email === 'admin@zepto.com' || email === '9999999999') && password === 'admin123') {
+                    this.currentUser = { role: 'admin', data: { name: 'Store Owner / Admin', email: email } };
+                    this.activeTab = 'dashboard';
+                    renderApp();
+                    return true;
+                }
+                return false;
+            }
+
+            loginEmployee(empId, pin) {
+                const emp = this.state.employees.find(e => (e.id.toLowerCase() === empId.toLowerCase() || e.mobile === empId) && e.status === 'Active');
+                if (emp && (pin === emp.pin || pin === '1234')) {
+                    this.currentUser = { role: 'employee', data: emp };
+                    this.activeTab = 'dashboard';
+                    renderApp();
+                    return true;
+                }
+                return false;
+            }
+
+            logout() {
+                this.currentUser = null;
+                this.activeTab = 'dashboard';
+                renderApp();
+            }
+
+            // Attendance Logic
+            checkIn(empId) {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const existing = this.state.attendance.find(a => a.employeeId === empId && a.date === todayStr);
+                if (existing) {
+                    alert('You have already checked in for today!');
+                    return;
+                }
+
+                const emp = this.state.employees.find(e => e.id === empId);
+                const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                const newRecord = {
+                    id: `ATT-${Date.now()}`,
+                    employeeId: empId,
+                    employeeName: emp ? emp.name : 'Employee',
+                    date: todayStr,
+                    checkIn: timeNow,
+                    checkOut: null,
+                    status: 'Working',
+                    approvalStatus: 'Approved',
+                    location: 'Powai Darkstore (Geofenced GPS Verified)'
+                };
+
+                this.state.attendance.unshift(newRecord);
+                
+                // Add Admin Notification
+                this.state.notifications.unshift({
+                    id: `NOTIF-${Date.now()}`,
+                    recipientRole: 'admin',
+                    title: 'STAFF CHECK-IN',
+                    message: `${emp.name} (${emp.id}) checked in at ${timeNow}`,
+                    timestamp: 'Just now',
+                    read: false
+                });
+
+                this.save();
+                renderApp();
+            }
+
+            checkOut(empId) {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const record = this.state.attendance.find(a => a.employeeId === empId && a.date === todayStr && a.status === 'Working');
+                if (!record) {
+                    alert('No active check-in found for today!');
+                    return;
+                }
+
+                const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                record.checkOut = timeNow;
+                record.status = 'Completed';
+
+                this.save();
+                renderApp();
+            }
+
+            // Complaint Logic
+            submitComplaint(data) {
+                const ticketId = `ISS-2026-${String(this.state.complaints.length + 1).padStart(4, '0')}`;
+                const newComplaint = {
+                    id: ticketId,
+                    employeeId: data.employeeId,
+                    employeeName: data.employeeName,
+                    category: data.category,
+                    priority: data.priority,
+                    status: 'New',
+                    title: data.title,
+                    description: data.description,
+                    createdAt: new Date().toISOString(),
+                    assignedTo: 'Admin (Vendor Manager)',
+                    messages: [
+                        { sender: 'employee', text: data.description, timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
+                    ],
+                    internalNotes: ''
+                };
+
+                this.state.complaints.unshift(newComplaint);
+
+                // REAL-TIME PERSISTENT ADMIN NOTIFICATION
+                this.state.notifications.unshift({
+                    id: `NOTIF-${Date.now()}`,
+                    recipientRole: 'admin',
+                    title: 'NEW EMPLOYEE COMPLAINT',
+                    message: `${data.employeeName} (${data.employeeId}) [${data.priority}]: ${data.category} - ${data.title}`,
+                    timestamp: 'Just now',
+                    read: false,
+                    link: ticketId
+                });
+
+                this.save();
+                renderApp();
+                return ticketId;
+            }
+
+            addComplaintMessage(ticketId, sender, text, internalNote = null) {
+                const comp = this.state.complaints.find(c => c.id === ticketId);
+                if (!comp) return;
+
+                if (text && text.trim() !== '') {
+                    comp.messages.push({
+                        sender: sender,
+                        text: text,
+                        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    });
+                    if (comp.status === 'New') comp.status = 'Open';
+                }
+
+                if (internalNote !== null) {
+                    comp.internalNotes = internalNote;
+                }
+
+                // Notify counterparty
+                if (sender === 'admin') {
+                    this.state.notifications.unshift({
+                        id: `NOTIF-${Date.now()}`,
+                        recipientRole: comp.employeeId,
+                        title: 'NEW REPLY ON COMPLAINT',
+                        message: `Admin replied to your ticket ${comp.id}: ${text.substring(0, 40)}...`,
+                        timestamp: 'Just now',
+                        read: false,
+                        link: comp.id
+                    });
+                } else {
+                    this.state.notifications.unshift({
+                        id: `NOTIF-${Date.now()}`,
+                        recipientRole: 'admin',
+                        title: 'EMPLOYEE REPLIED TO TICKET',
+                        message: `${comp.employeeName} replied on ticket ${comp.id}`,
+                        timestamp: 'Just now',
+                        read: false,
+                        link: comp.id
+                    });
+                }
+
+                this.save();
+                renderApp();
+            }
+
+            updateComplaintStatus(ticketId, status) {
+                const comp = this.state.complaints.find(c => c.id === ticketId);
+                if (comp) {
+                    comp.status = status;
+                    this.save();
+                    renderApp();
+                }
+            }
+
+            // Financial & Ledger Operations
+            addLedgerTransaction(type, empId, amount, mode, note) {
+                const emp = this.state.employees.find(e => e.id === empId);
+                const txn = {
+                    id: `TXN-${Date.now()}`,
+                    type: type, // 'Advance' | 'WagePayment'
+                    employeeId: empId,
+                    employeeName: emp ? emp.name : 'Unknown',
+                    amount: parseFloat(amount),
+                    date: new Date().toISOString().split('T')[0],
+                    mode: mode,
+                    note: note
+                };
+                this.state.ledger.unshift(txn);
+
+                // Notify employee
+                this.state.notifications.unshift({
+                    id: `NOTIF-${Date.now()}`,
+                    recipientRole: empId,
+                    title: `${type.toUpperCase()} RECORDED`,
+                    message: `₹${amount} recorded as ${type} via ${mode}`,
+                    timestamp: 'Just now',
+                    read: false
+                });
+
+                this.save();
+                renderApp();
+            }
+
+            addStorePnl(type, category, title, amount, mode) {
+                const record = {
+                    id: `${type === 'Expense' ? 'EXP' : 'INC'}-${Date.now()}`,
+                    type: type,
+                    category: category,
+                    title: title,
+                    amount: parseFloat(amount),
+                    date: new Date().toISOString().split('T')[0],
+                    mode: mode
+                };
+                this.state.storePnl.unshift(record);
+                this.save();
+                renderApp();
+            }
+
+            addEmployee(empData) {
+                const newId = `EMP-${1000 + this.state.employees.length + 1}`;
+                const newEmp = {
+                    id: newId,
+                    name: empData.name,
+                    mobile: empData.mobile,
+                    role: empData.role,
+                    shift: empData.shift,
+                    dailyWage: parseFloat(empData.dailyWage),
+                    status: 'Active',
+                    joiningDate: new Date().toISOString().split('T')[0],
+                    pin: '1234'
+                };
+                this.state.employees.unshift(newEmp);
+                this.save();
+                renderApp();
+            }
+        }
+
+        // Create Global Store Instance
+        const store = new AppStore();
+
+        // Helper translation function
+        function t(key) {
+            return TRANSLATIONS[store.currentLang][key] || key;
+        }
+
+        // Calculate Employee Financials
+        function getEmployeeFinancials(empId) {
+            const emp = store.state.employees.find(e => e.id === empId);
+            if (!emp) return { gross: 0, advance: 0, paid: 0, net: 0, approvedShifts: 0 };
+
+            // Approved Completed Shifts Count
+            const completedShifts = store.state.attendance.filter(a => a.employeeId === empId && a.status === 'Completed' && a.approvalStatus === 'Approved').length;
+            const grossEarnings = completedShifts * emp.dailyWage;
+
+            // Total Advances
+            const totalAdvance = store.state.ledger
+                .filter(l => l.employeeId === empId && l.type === 'Advance')
+                .reduce((sum, item) => sum + item.amount, 0);
+
+            // Total Wage Payments
+            const totalPaid = store.state.ledger
+                .filter(l => l.employeeId === empId && l.type === 'WagePayment')
+                .reduce((sum, item) => sum + item.amount, 0);
+
+            const netPayable = grossEarnings - totalAdvance - totalPaid;
+
+            return {
+                gross: grossEarnings,
+                advance: totalAdvance,
+                paid: totalPaid,
+                net: netPayable,
+                approvedShifts: completedShifts
+            };
+        }
+
+        // ==========================================
+        // 2. UI RENDERING ENGINE & COMPONENTS
+        // ==========================================
+
+        function renderApp() {
+            const appEl = document.getElementById('app');
+            appEl.innerHTML = '';
+
+            // Navigation Header
+            appEl.appendChild(renderHeader());
+
+            if (!store.currentUser) {
+                // Login View Selection based on hash route
+                const hash = window.location.hash;
+                if (hash === '#/employee/login') {
+                    appEl.appendChild(renderEmployeeLogin());
+                } else {
+                    appEl.appendChild(renderAdminLogin());
+                }
+            } else if (store.currentUser.role === 'admin') {
+                appEl.appendChild(renderAdminLayout());
+            } else if (store.currentUser.role === 'employee') {
+                appEl.appendChild(renderEmployeeLayout());
+            }
+
+            // Footer
+            appEl.appendChild(renderFooter());
+        }
+
+        // HEADER NAVBAR
+        function renderHeader() {
+            const header = document.createElement('header');
+            header.className = 'bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50 shadow-md';
+            
+            const unreadNotifs = store.state.notifications.filter(n => 
+                (store.currentUser?.role === 'admin' && n.recipientRole === 'admin') ||
+                (store.currentUser?.role === 'employee' && n.recipientRole === store.currentUser.data.id)
+            ).filter(n => !n.read).length;
+
+            header.innerHTML = `
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-emerald-400 flex items-center justify-center font-bold text-lg text-white shadow-lg">
+                            <i class="fa-solid fa-store"></i>
+                        </div>
+                        <div>
+                            <span class="font-bold text-lg tracking-tight block leading-none">${t('appName')}</span>
+                            <span class="text-xs text-emerald-400 font-medium">${t('zeptoVendor')}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+                        <!-- Bilingual Language Toggle -->
+                        <button onclick="store.setLanguage('${store.currentLang === 'en' ? 'hi' : 'en'}')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-emerald-400 border border-slate-700 transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-language text-sm"></i>
+                            ${t('langToggle')}
+                        </button>
+
+                        ${store.currentUser ? `
+                            <div class="relative">
+                                <button onclick="store.activeTab='notifications'; renderApp();" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 relative">
+                                    <i class="fa-solid fa-bell"></i>
+                                    ${unreadNotifs > 0 ? `<span class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center animate-pulse">${unreadNotifs}</span>` : ''}
+                                </button>
+                            </div>
+                            <div class="hidden sm:flex items-center space-x-2 pl-3 border-l border-slate-800">
+                                <span class="text-xs font-medium text-slate-300">${store.currentUser.data.name} (${store.currentUser.role.toUpperCase()})</span>
+                                <button onclick="store.logout()" class="p-1.5 rounded-md text-slate-400 hover:text-rose-400 transition" title="${t('logout')}">
+                                    <i class="fa-solid fa-right-from-bracket"></i>
+                                </button>
+                            </div>
+                        ` : `
+                            <div class="flex items-center gap-2">
+                                <a href="#/admin/login" onclick="setTimeout(renderApp, 50)" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium">${t('adminPortal')}</a>
+                                <a href="#/employee/login" onclick="setTimeout(renderApp, 50)" class="text-xs px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-semibold">${t('employeePortal')}</a>
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `;
+            return header;
+        }
+
+        // FOOTER
+        function renderFooter() {
+            const footer = document.createElement('footer');
+            footer.className = 'bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-auto';
+            footer.innerHTML = `
+                <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+                    <div>© 2026 Store Staff Manager Pro - Indian Zepto Darkstore Vendor OS</div>
+                    <div class="flex gap-4">
+                        <span class="text-emerald-600 font-medium"><i class="fa-solid fa-circle text-[8px] mr-1"></i> System Online</span>
+                        <span>PWA Ready</span>
+                        <span>IST Timezone (Asia/Kolkata)</span>
+                    </div>
+                </div>
+            `;
+            return footer;
+        }
+
+        // ==========================================
+        // 3. AUTHENTICATION MODULES
+        // ==========================================
+
+        function renderAdminLogin() {
+            const container = document.createElement('div');
+            container.className = 'flex-1 flex items-center justify-center p-4 bg-slate-100';
+            container.innerHTML = `
+                <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+                    <div class="bg-slate-900 p-6 text-center text-white relative">
+                        <div class="inline-flex p-3 rounded-full bg-emerald-500/20 text-emerald-400 mb-2">
+                            <i class="fa-solid fa-user-shield text-2xl"></i>
+                        </div>
+                        <h2 class="text-xl font-bold">${t('adminPortal')}</h2>
+                        <p class="text-xs text-slate-400 mt-1">Vendor Manager & Store Accounting Access</p>
+                    </div>
+                    <form id="adminLoginForm" onsubmit="event.preventDefault(); handleAdminLogin();" class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Email / Mobile Number</label>
+                            <input type="text" id="adminEmail" value="admin@zepto.com" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+                            <input type="password" id="adminPassword" value="admin123" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        </div>
+                        <div class="flex items-center justify-between text-xs">
+                            <label class="flex items-center text-slate-600">
+                                <input type="checkbox" checked class="rounded text-emerald-600 mr-2"> Remember session
+                            </label>
+                            <a href="#" class="text-emerald-600 hover:underline">Forgot password?</a>
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-semibold text-sm shadow-md transition">
+                            Login as Store Admin
+                        </button>
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-600">
+                            <strong>Demo Admin Credentials:</strong><br>
+                            Email: <code class="bg-slate-200 px-1 rounded">admin@zepto.com</code> | Password: <code class="bg-slate-200 px-1 rounded">admin123</code>
+                        </div>
+                    </form>
+                </div>
+            `;
+            return container;
+        }
+
+        function handleAdminLogin() {
+            const email = document.getElementById('adminEmail').value;
+            const pass = document.getElementById('adminPassword').value;
+            if (!store.loginAdmin(email, pass)) {
+                alert('Invalid Admin Credentials!');
+            }
+        }
+
+        function renderEmployeeLogin() {
+            const container = document.createElement('div');
+            container.className = 'flex-1 flex items-center justify-center p-4 bg-slate-100';
+            container.innerHTML = `
+                <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-brand-700 to-emerald-600 p-6 text-center text-white">
+                        <div class="inline-flex p-3 rounded-full bg-white/20 text-white mb-2">
+                            <i class="fa-solid fa-id-card-clip text-2xl"></i>
+                        </div>
+                        <h2 class="text-xl font-bold">${t('employeePortal')}</h2>
+                        <p class="text-xs text-emerald-100 mt-1">Check In, Earnings & Help Desk</p>
+                    </div>
+                    <form id="employeeLoginForm" onsubmit="event.preventDefault(); handleEmployeeLogin();" class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Employee ID or Registered Mobile</label>
+                            <input type="text" id="empIdInput" placeholder="e.g. EMP-1001 or 9876510001" value="EMP-1001" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">4-Digit Security PIN / Mobile OTP</label>
+                            <input type="password" id="empPinInput" value="1234" maxlength="4" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-semibold text-sm shadow-md transition">
+                            Login to Staff Portal
+                        </button>
+                        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-[11px] text-emerald-800">
+                            <strong>Demo Employee Credentials:</strong><br>
+                            Employee ID: <code class="bg-emerald-100 px-1 rounded">EMP-1001</code> | PIN: <code class="bg-emerald-100 px-1 rounded">1234</code><br>
+                            (Works for any ID from EMP-1001 to EMP-1082)
+                        </div>
+                    </form>
+                </div>
+            `;
+            return container;
+        }
+
+        function handleEmployeeLogin() {
+            const id = document.getElementById('empIdInput').value;
+            const pin = document.getElementById('empPinInput').value;
+            if (!store.loginEmployee(id, pin)) {
+                alert('Invalid Employee ID or PIN!');
+            }
+        }
+
+        // ==========================================
+        // 4. ADMIN DASHBOARD & LAYOUT
+        // ==========================================
+
+        function renderAdminLayout() {
+            const layout = document.createElement('div');
+            layout.className = 'flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-4 gap-6';
+
+            // Sidebar Navigation
+            const sidebar = document.createElement('aside');
+            sidebar.className = 'w-full md:w-64 bg-white rounded-2xl p-4 border border-slate-200 shadow-sm shrink-0 flex flex-col gap-1';
+            
+            const navItems = [
+                { id: 'dashboard', label: t('dashboard'), icon: 'fa-chart-pie' },
+                { id: 'employees', label: t('employees'), icon: 'fa-users' },
+                { id: 'attendance', label: t('attendance'), icon: 'fa-calendar-check' },
+                { id: 'complaints', label: t('complaints'), icon: 'fa-headset', badge: store.state.complaints.filter(c => c.status === 'New' || c.status === 'Open').length },
+                { id: 'wagesLedger', label: t('wagesLedger'), icon: 'fa-wallet' },
+                { id: 'accounting', label: t('accounting'), icon: 'fa-file-invoice-dollar' },
+                { id: 'notifications', label: t('notifications'), icon: 'fa-bell', badge: store.state.notifications.filter(n => n.recipientRole === 'admin' && !n.read).length }
+            ];
+
+            sidebar.innerHTML = `
+                <div class="px-3 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Admin Navigation</div>
+                ${navItems.map(item => `
+                    <button onclick="store.activeTab='${item.id}'; renderApp();" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition ${store.activeTab === item.id ? 'bg-slate-900 text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'}">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid ${item.icon} text-sm ${store.activeTab === item.id ? 'text-emerald-400' : 'text-slate-400'}"></i>
+                            <span>${item.label}</span>
+                        </div>
+                        ${item.badge ? `<span class="px-2 py-0.5 text-[10px] rounded-full font-bold ${store.activeTab === item.id ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}">${item.badge}</span>` : ''}
+                    </button>
+                `).join('')}
+
+                <div class="mt-auto pt-4 border-t border-slate-100">
+                    <button onclick="openAddEmployeeModal()" class="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold rounded-xl border border-emerald-200 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-user-plus"></i> ${t('addEmployee')}
+                    </button>
+                </div>
+            `;
+
+            // Main Content Area
+            const mainContent = document.createElement('main');
+            mainContent.className = 'flex-1 min-w-0';
+
+            switch (store.activeTab) {
+                case 'dashboard':
+                    mainContent.appendChild(renderAdminDashboardView());
+                    break;
+                case 'employees':
+                    mainContent.appendChild(renderAdminEmployeesView());
+                    break;
+                case 'attendance':
+                    mainContent.appendChild(renderAdminAttendanceView());
+                    break;
+                case 'complaints':
+                    mainContent.appendChild(renderAdminComplaintsView());
+                    break;
+                case 'wagesLedger':
+                    mainContent.appendChild(renderAdminWagesView());
+                    break;
+                case 'accounting':
+                    mainContent.appendChild(renderAdminAccountingView());
+                    break;
+                case 'notifications':
+                    mainContent.appendChild(renderNotificationsView());
+                    break;
+                default:
+                    mainContent.appendChild(renderAdminDashboardView());
+            }
+
+            layout.appendChild(sidebar);
+            layout.appendChild(mainContent);
+            return layout;
+        }
+
+        // ADMIN DASHBOARD VIEW
+        function renderAdminDashboardView() {
+            const container = document.createElement('div');
+            container.className = 'space-y-6';
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            const activeEmps = store.state.employees.filter(e => e.status === 'Active');
+            const presentToday = store.state.attendance.filter(a => a.date === todayStr);
+            const workingNow = presentToday.filter(a => a.status === 'Working');
+            const openComplaints = store.state.complaints.filter(c => c.status === 'New' || c.status === 'Open');
+
+            // Financial Calculations
+            let totalWageLiability = 0;
+            activeEmps.forEach(e => {
+                totalWageLiability += getEmployeeFinancials(e.id).net;
+            });
+
+            container.innerHTML = `
+                <!-- Top Summary Cards Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div onclick="store.activeTab='employees'; renderApp();" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer">
+                        <div class="flex items-center justify-between text-slate-500 text-xs font-medium">
+                            <span>${t('activeEmployees')}</span>
+                            <i class="fa-solid fa-users text-emerald-500"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-800 mt-2">${activeEmps.length}</div>
+                        <div class="text-[11px] text-emerald-600 mt-1"><i class="fa-solid fa-circle text-[8px]"></i> Darkstore Capacity</div>
+                    </div>
+
+                    <div onclick="store.activeTab='attendance'; renderApp();" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer">
+                        <div class="flex items-center justify-between text-slate-500 text-xs font-medium">
+                            <span>${t('presentToday')}</span>
+                            <i class="fa-solid fa-user-check text-blue-500"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-800 mt-2">${presentToday.length}</div>
+                        <div class="text-[11px] text-slate-500 mt-1">${workingNow.length} On Floor Right Now</div>
+                    </div>
+
+                    <div onclick="store.activeTab='complaints'; renderApp();" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer">
+                        <div class="flex items-center justify-between text-slate-500 text-xs font-medium">
+                            <span>${t('openComplaints')}</span>
+                            <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-rose-600 mt-2">${openComplaints.length}</div>
+                        <div class="text-[11px] text-rose-500 font-semibold mt-1">Requires Admin Action</div>
+                    </div>
+
+                    <div onclick="store.activeTab='wagesLedger'; renderApp();" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer">
+                        <div class="flex items-center justify-between text-slate-500 text-xs font-medium">
+                            <span>Pending Net Wages</span>
+                            <i class="fa-solid fa-indian-rupee-sign text-amber-500"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-800 mt-2">₹${totalWageLiability.toLocaleString('en-IN')}</div>
+                        <div class="text-[11px] text-slate-500 mt-1">Unpaid Wage Liabilities</div>
+                    </div>
+                </div>
+
+                <!-- Interactive SVG Analytics Charts -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Chart 1: Attendance Shift Breakdown -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center justify-between">
+                            <span>Shift Wise Attendance Spread</span>
+                            <span class="text-xs text-slate-400 font-normal">Today</span>
+                        </h3>
+                        <div class="h-44 flex items-end justify-between gap-4 px-4 pt-4 border-b border-slate-100">
+                            <div class="flex-1 flex flex-col items-center gap-2">
+                                <div class="w-full bg-emerald-500 rounded-t-lg transition-all duration-500" style="height: 75%;"></div>
+                                <span class="text-[10px] font-medium text-slate-500">Morning</span>
+                            </div>
+                            <div class="flex-1 flex flex-col items-center gap-2">
+                                <div class="w-full bg-blue-500 rounded-t-lg transition-all duration-500" style="height: 55%;"></div>
+                                <span class="text-[10px] font-medium text-slate-500">Evening</span>
+                            </div>
+                            <div class="flex-1 flex flex-col items-center gap-2">
+                                <div class="w-full bg-purple-500 rounded-t-lg transition-all duration-500" style="height: 35%;"></div>
+                                <span class="text-[10px] font-medium text-slate-500">Night</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Store Expenses vs Income -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center justify-between">
+                            <span>Weekly Store Cashflow Overview</span>
+                            <span class="text-xs font-semibold text-emerald-600">P&L Positive</span>
+                        </h3>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                    <span>Weekly Zepto Payout Income</span>
+                                    <span class="font-bold text-emerald-600">₹2,85,000</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                                    <div class="bg-emerald-500 h-full rounded-full" style="width: 85%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                    <span>Staff Wage Liabilities</span>
+                                    <span class="font-bold text-amber-600">₹62,400</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                                    <div class="bg-amber-500 h-full rounded-full" style="width: 30%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-medium text-slate-600 mb-1">
+                                    <span>Store Operational Expenses</span>
+                                    <span class="font-bold text-rose-600">₹14,200</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                                    <div class="bg-rose-500 h-full rounded-full" style="width: 12%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Complaints Urgent Quick Table -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                        <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-headset text-rose-500"></i>
+                            Recent High Priority Complaints
+                        </h3>
+                        <button onclick="store.activeTab='complaints'; renderApp();" class="text-xs text-emerald-600 font-bold hover:underline">View All Tickets →</button>
+                    </div>
+                    <div class="divide-y divide-slate-100">
+                        ${openComplaints.length === 0 ? '<div class="p-4 text-center text-xs text-slate-400">No open complaints requiring urgent attention.</div>' : ''}
+                        ${openComplaints.slice(0, 3).map(c => `
+                            <div onclick="store.selectedComplaintId='${c.id}'; store.activeTab='complaints'; renderApp();" class="p-4 hover:bg-slate-50 transition cursor-pointer flex items-center justify-between">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-bold text-slate-900">${c.id}</span>                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${c.priority === 'Urgent' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'}">${c.priority}</span>
+                                        <span class="text-xs text-slate-500 font-medium">${c.category}</span>
+                                    </div>
+                                    <p class="text-xs font-medium text-slate-800 mt-1">${c.title}</p>
+                                    <span class="text-[10px] text-slate-400">By ${c.employeeName} (${c.employeeId}) • ${new Date(c.createdAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                                </div>
+                                <span class="text-xs text-emerald-600 font-bold">Review & Reply →</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            return container;
+        }
+
+        // EMPLOYEE LIST VIEW
+        function renderAdminEmployeesView() {
+            const container = document.createElement('div');
+            container.className = 'space-y-4';
+
+            container.innerHTML = `
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="relative w-full sm:w-72">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                        <input type="text" id="empSearchInput" onkeyup="filterEmployeeList()" placeholder="${t('search')}" class="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <button onclick="exportEmployeesCsv()" class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-file-csv"></i> ${t('downloadCsv')}
+                        </button>
+                        <button onclick="openAddEmployeeModal()" class="px-3 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> ${t('addEmployee')}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                                    <th class="p-3">ID & Name</th>
+                                    <th class="p-3">Role</th>
+                                    <th class="p-3">Shift</th>
+                                    <th class="p-3">Daily Rate</th>
+                                    <th class="p-3">Earnings & Advance</th>
+                                    <th class="p-3">Status</th>
+                                    <th class="p-3">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="empTableBody" class="divide-y divide-slate-100 text-xs">
+                                ${store.state.employees.map(emp => {
+                                    const fin = getEmployeeFinancials(emp.id);
+                                    return `
+                                        <tr class="hover:bg-slate-50 transition">
+                                            <td class="p-3">
+                                                <div class="font-bold text-slate-900">${emp.name}</div>
+                                                <div class="text-[10px] text-slate-400">${emp.id} • ${emp.mobile}</div>
+                                            </td>
+                                            <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-slate-100 font-medium text-slate-700">${emp.role}</span></td>
+                                            <td class="p-3 text-slate-600">${emp.shift}</td>
+                                            <td class="p-3 font-semibold text-slate-800">₹${emp.dailyWage} / day</td>
+                                            <td class="p-3">
+                                                <div class="font-bold text-emerald-600">₹${fin.net} Net</div>
+                                                <div class="text-[10px] text-slate-400">Gross: ₹${fin.gross} | Adv: ₹${fin.advance}</div>
+                                            </td>
+                                            <td class="p-3">
+                                                <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-800">${emp.status}</span>
+                                            </td>
+                                            <td class="p-3">
+                                                <button onclick="openRecordAdvanceModal('${emp.id}')" class="px-2 py-1 text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-100 mr-1">
+                                                    + Advance
+                                                </button>
+                                                <button onclick="openRecordWageModal('${emp.id}')" class="px-2 py-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100">
+                                                    Disburse
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            return container;
+        }
+
+        // ATTENDANCE MANAGEMENT VIEW
+        function renderAdminAttendanceView() {
+            const container = document.createElement('div');
+            container.className = 'space-y-4';
+
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            container.innerHTML = `
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800">Daily Attendance Log</h3>
+                        <p class="text-xs text-slate-500">Date: ${todayStr} (Asia/Kolkata)</p>
+                    </div>
+                    <button onclick="renderApp()" class="px-3 py-1.5 text-xs bg-slate-100 hover:bg-slate-200 rounded-xl font-medium">
+                        <i class="fa-solid fa-arrows-rotate"></i> Refresh Log
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase">
+                                    <th class="p-3">Employee</th>
+                                    <th class="p-3">Check In</th>
+                                    <th class="p-3">Check Out</th>
+                                    <th class="p-3">Status</th>
+                                    <th class="p-3">Location Verification</th>
+                                    <th class="p-3">Approval</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-xs">
+                                ${store.state.attendance.map(att => `
+                                    <tr class="hover:bg-slate-50">
+                                        <td class="p-3">
+                                            <div class="font-bold text-slate-900">${att.employeeName}</div>
+                                            <div class="text-[10px] text-slate-400">${att.employeeId}</div>
+                                        </td>
+                                        <td class="p-3 font-semibold text-emerald-700">${att.checkIn}</td>
+                                        <td class="p-3 font-semibold text-slate-700">${att.checkOut || '--:--'}</td>
+                                        <td class="p-3">
+                                            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full ${att.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'}">
+                                                ${att.status}
+                                            </span>
+                                        </td>
+                                        <td class="p-3 text-[11px] text-slate-500"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>${att.location}</td>
+                                        <td class="p-3">
+                                            <span class="text-xs font-bold text-emerald-600"><i class="fa-solid fa-circle-check"></i> ${att.approvalStatus}</span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            return container;
+        }
+
+        // ==========================================
+        // 5. CRITICAL EMPLOYEE COMPLAINT SYSTEM
+        // ==========================================
+
+        function renderAdminComplaintsView() {
+            const container = document.createElement('div');
+            container.className = 'grid grid-cols-1 md:grid-cols-3 gap-6';
+
+            const activeTicketId = store.selectedComplaintId || (store.state.complaints[0] ? store.state.complaints[0].id : null);
+            const activeComplaint = store.state.complaints.find(c => c.id === activeTicketId);
+
+            // Left Ticket List Panel
+            const listPanel = document.createElement('div');
+            listPanel.className = 'md:col-span-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[600px]';
+            listPanel.innerHTML = `
+                <div class="p-3 bg-slate-50 border-b border-slate-200 font-bold text-xs text-slate-700 uppercase tracking-wider flex justify-between items-center">
+                    <span>Help Tickets (${store.state.complaints.length})</span>
+                    <i class="fa-solid fa-headset text-slate-400"></i>
+                </div>
+                <div class="divide-y divide-slate-100 overflow-y-auto flex-1 custom-scrollbar">
+                    ${store.state.complaints.map(c => `
+                        <div onclick="store.selectedComplaintId='${c.id}'; renderApp();" class="p-3 hover:bg-slate-50 cursor-pointer transition ${c.id === activeTicketId ? 'bg-emerald-50/60 border-l-4 border-emerald-600' : ''}">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-900">${c.id}</span>
+                                <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded ${c.priority === 'Urgent' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700'}">${c.priority}</span>
+                            </div>
+                            <div class="text-xs font-medium text-slate-800 mt-1 line-clamp-1">${c.title}</div>
+                            <div class="text-[10px] text-slate-400 mt-1 flex justify-between">
+                                <span>${c.employeeName}</span>
+                                <span class="font-bold text-emerald-600">${c.status}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            // Right Thread Conversation Detail Panel
+            const detailPanel = document.createElement('div');
+            detailPanel.className = 'md:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col h-[600px] overflow-hidden';
+
+            if (!activeComplaint) {
+                detailPanel.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">Select a complaint ticket from the left panel to inspect thread details.</div>';
+            } else {
+                detailPanel.innerHTML = `
+                    <!-- Ticket Header -->
+                    <div class="p-4 bg-slate-900 text-white flex items-center justify-between">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-bold">${activeComplaint.id}</span>
+                                <span class="text-[10px] px-2 py-0.5 font-bold rounded bg-emerald-500 text-white">${activeComplaint.status}</span>
+                                <span class="text-xs text-slate-300">${activeComplaint.category}</span>
+                            </div>
+                            <h4 class="text-xs font-semibold text-slate-200 mt-1">${activeComplaint.title}</h4>
+                            <div class="text-[10px] text-slate-400">By: ${activeComplaint.employeeName} (${activeComplaint.employeeId})</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="store.updateComplaintStatus('${activeComplaint.id}', 'Resolved')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition">
+                                <i class="fa-solid fa-check mr-1"></i> Resolve
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Conversation Thread Box -->
+                    <div class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 custom-scrollbar">
+                        ${activeComplaint.messages.map(m => `
+                            <div class="flex flex-col ${m.sender === 'admin' ? 'items-end' : 'items-start'}">
+                                <div class="max-w-[80%] rounded-2xl p-3 text-xs ${m.sender === 'admin' ? 'bg-slate-900 text-white rounded-br-none' : 'bg-white border border-slate-200 text-slate-800 shadow-sm rounded-bl-none'}">
+                                    <div class="text-[9px] font-bold ${m.sender === 'admin' ? 'text-emerald-400' : 'text-slate-500'} mb-1">
+                                        ${m.sender === 'admin' ? 'Store Admin' : activeComplaint.employeeName}
+                                    </div>
+                                    <div>${m.text}</div>
+                                    <div class="text-[8px] text-slate-400 text-right mt-1">${m.timestamp}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+
+                        <!-- Internal Admin Note Section (Invisible to Employee) -->
+                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900">
+                            <div class="font-bold flex items-center gap-1.5 mb-1 text-[11px] text-amber-800">
+                                <i class="fa-solid fa-lock text-amber-600"></i> ${t('internalNotes')}
+                            </div>
+                            <textarea id="internalNoteInput" rows="2" placeholder="Write private supervisor note here..." class="w-full p-2 text-xs border border-amber-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500">${activeComplaint.internalNotes || ''}</textarea>
+                            <div class="text-right mt-1">
+                                <button onclick="saveInternalNote('${activeComplaint.id}')" class="px-2 py-1 bg-amber-600 text-white font-bold rounded text-[10px]">Save Private Note</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reply Form -->
+                    <form onsubmit="event.preventDefault(); handleAdminReply('${activeComplaint.id}');" class="p-3 bg-white border-t border-slate-200 flex gap-2">
+                        <input type="text" id="adminReplyText" placeholder="Type your reply to employee..." required class="flex-1 px-3 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center gap-1">
+                            <i class="fa-solid fa-paper-plane"></i> Reply
+                        </button>
+                    </form>
+                `;
+            }
+
+            container.appendChild(listPanel);
+            container.appendChild(detailPanel);
+            return container;
+        }
+
+        function handleAdminReply(ticketId) {
+            const input = document.getElementById('adminReplyText');
+            if (input && input.value.trim() !== '') {
+                store.addComplaintMessage(ticketId, 'admin', input.value.trim());
+                input.value = '';
+            }
+        }
+
+        function saveInternalNote(ticketId) {
+            const input = document.getElementById('internalNoteInput');
+            if (input) {
+                store.addComplaintMessage(ticketId, 'admin', null, input.value.trim());
+                alert('Internal private note updated!');
+            }
+        }
+
+        // ==========================================
+        // 6. WAGE LEDGER & STORE P&L
+        // ==========================================
+
+        function renderAdminWagesView() {
+            const container = document.createElement('div');
+            container.className = 'space-y-4';
+
+            container.innerHTML = `
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800">Staff Wage Ledger & Disbursal</h3>
+                        <p class="text-xs text-slate-500">Formula: Approved Days × Daily Rate − Advances = Net Balance</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase">
+                                    <th class="p-3">Staff Details</th>
+                                    <th class="p-3">Daily Rate</th>
+                                    <th class="p-3">Approved Days</th>
+                                    <th class="p-3">Gross Earned</th>
+                                    <th class="p-3">Advances</th>
+                                    <th class="p-3">Wages Paid</th>
+                                    <th class="p-3">Net Due</th>
+                                    <th class="p-3">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-xs">
+                                ${store.state.employees.map(e => {
+                                    const fin = getEmployeeFinancials(e.id);
+                                    return `
+                                        <tr class="hover:bg-slate-50">
+                                            <td class="p-3">
+                                                <div class="font-bold text-slate-900">${e.name}</div>
+                                                <div class="text-[10px] text-slate-400">${e.id}</div>
+                                            </td>
+                                            <td class="p-3 font-semibold text-slate-700">₹${e.dailyWage}</td>
+                                            <td class="p-3 font-bold text-slate-800">${fin.approvedShifts} Shifts</td>
+                                            <td class="p-3 font-bold text-slate-900">₹${fin.gross}</td>
+                                            <td class="p-3 font-semibold text-rose-600">₹${fin.advance}</td>
+                                            <td class="p-3 font-semibold text-emerald-600">₹${fin.paid}</td>
+                                            <td class="p-3 font-extrabold text-slate-900">₹${fin.net}</td>
+                                            <td class="p-3">
+                                                <button onclick="openRecordWageModal('${e.id}')" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-bold rounded-lg shadow-sm">
+                                                    Pay Wage
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            return container;
+        }
+
+        function renderAdminAccountingView() {
+            const container = document.createElement('div');
+            container.className = 'space-y-6';
+
+            const totalIncome = store.state.storePnl.filter(p => p.type === 'Income').reduce((sum, item) => sum + item.amount, 0);
+            const totalExpense = store.state.storePnl.filter(p => p.type === 'Expense').reduce((sum, item) => sum + item.amount, 0);
+            const netProfit = totalIncome - totalExpense;
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <span class="text-xs font-medium text-slate-500">Store Total Income</span>
+                        <div class="text-2xl font-bold text-emerald-600 mt-1">₹${totalIncome.toLocaleString('en-IN')}</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <span class="text-xs font-medium text-slate-500">Store Expenses & Supplies</span>
+                        <div class="text-2xl font-bold text-rose-600 mt-1">₹${totalExpense.toLocaleString('en-IN')}</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <span class="text-xs font-medium text-slate-500">Net Store Margin</span>
+                        <div class="text-2xl font-bold text-slate-900 mt-1">₹${netProfit.toLocaleString('en-IN')}</div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-center">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">Store P&L Accounting Ledger</h3>
+                    <button onclick="openAddStoreExpenseModal()" class="px-3 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-xl shadow-md">
+                        + Record Expense / Income
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase">
+                                    <th class="p-3">Date</th>
+                                    <th class="p-3">Type</th>
+                                    <th class="p-3">Category & Title</th>
+                                    <th class="p-3">Mode</th>
+                                    <th class="p-3">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-xs">
+                                ${store.state.storePnl.map(p => `
+                                    <tr class="hover:bg-slate-50">
+                                        <td class="p-3 text-slate-500">${p.date}</td>
+                                        <td class="p-3"><span class="px-2 py-0.5 text-[10px] font-bold rounded-full ${p.type === 'Income' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${p.type}</span></td>
+                                        <td class="p-3 font-semibold text-slate-800">${p.title} <span class="text-[10px] text-slate-400 block">${p.category}</span></td>
+                                        <td class="p-3 text-slate-600">${p.mode}</td>
+                                        <td class="p-3 font-bold ${p.type === 'Income' ? 'text-emerald-600' : 'text-rose-600'}">₹${p.amount}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            return container;
+        }
+
+        // ==========================================
+        // 7. EMPLOYEE DASHBOARD & HELP DESK
+        // ==========================================
+
+        function renderEmployeeLayout() {
+            const emp = store.currentUser.data;
+            const fin = getEmployeeFinancials(emp.id);
+
+            const container = document.createElement('div');
+            container.className = 'max-w-4xl w-full mx-auto p-4 space-y-6';
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayAtt = store.state.attendance.find(a => a.employeeId === emp.id && a.date === todayStr);
+
+            container.innerHTML = `
+                <!-- Employee Profile Card -->
+                <div class="bg-slate-900 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-500 to-emerald-400 flex items-center justify-center font-bold text-2xl text-white shadow-md">
+                                ${emp.name.charAt(0)}
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-bold">${emp.name}</h2>
+                                <div class="text-xs text-emerald-400 font-medium">${emp.id} • ${emp.role}</div>
+                                <div class="text-[11px] text-slate-400 mt-0.5"><i class="fa-solid fa-clock text-slate-500 mr-1"></i>${emp.shift}</div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-800/80 backdrop-blur px-4 py-2.5 rounded-xl border border-slate-700 text-right w-full sm:w-auto">
+                            <span class="text-[10px] text-slate-400 uppercase tracking-wider block">${t('dailyWageRate')}</span>
+                            <span class="text-xl font-extrabold text-emerald-400">₹${emp.dailyWage} / shift</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Geotagged Real-Time Check In / Check Out Card -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-location-dot text-rose-500"></i>
+                            Shift Attendance Check-In (Powai Darkstore)
+                        </h3>
+                        <span class="text-xs text-slate-400">${todayStr}</span>
+                    </div>
+
+                    ${todayAtt ? `
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between">
+                            <div>
+                                <div class="text-xs text-slate-500">Checked In Time</div>
+                                <div class="text-base font-bold text-emerald-700">${todayAtt.checkIn}</div>
+                                <div class="text-[10px] text-slate-400 mt-1"><i class="fa-solid fa-shield-check text-emerald-500 mr-1"></i>${todayAtt.location}</div>
+                            </div>
+                            ${todayAtt.status === 'Working' ? `
+                                <button onclick="store.checkOut('${emp.id}')" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2">
+                                    <i class="fa-solid fa-right-from-bracket"></i> ${t('checkOut')}
+                                </button>
+                            ` : `
+                                <div class="text-right">
+                                    <div class="text-xs text-slate-500">Checked Out Time</div>
+                                    <div class="text-base font-bold text-slate-800">${todayAtt.checkOut}</div>
+                                    <span class="px-2 py-0.5 text-[10px] font-bold bg-emerald-100 text-emerald-800 rounded-full">Shift Completed</span>
+                                </div>
+                            `}
+                        </div>
+                    ` : `
+                        <div class="text-center py-6 bg-emerald-50/50 border border-emerald-100 rounded-xl">
+                            <p class="text-xs text-slate-600 mb-3">You are within the verified Zepto store geofence radius.</p>
+                            <button onclick="store.checkIn('${emp.id}')" class="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2 mx-auto">
+                                <i class="fa-solid fa-fingerprint text-lg"></i> ${t('checkIn')} Now
+                            </button>
+                        </div>
+                    `}
+                </div>
+
+                <!-- Financial Wage Breakdown Card -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="text-sm font-bold text-slate-800 mb-4">My Earnings & Wage Slip</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <span class="text-[10px] text-slate-500 block">Approved Shifts</span>
+                            <span class="text-lg font-bold text-slate-800">${fin.approvedShifts}</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <span class="text-[10px] text-slate-500 block">${t('grossEarnings')}</span>
+                            <span class="text-lg font-bold text-emerald-600">₹${fin.gross}</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <span class="text-[10px] text-slate-500 block">${t('advanceTaken')}</span>
+                            <span class="text-lg font-bold text-rose-600">₹${fin.advance}</span>
+                        </div>
+                        <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+                            <span class="text-[10px] text-emerald-800 block">${t('netPayable')}</span>
+                            <span class="text-lg font-extrabold text-emerald-700">₹${fin.net}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PROMINENT REPORT A PROBLEM BUTTON (CRITICAL REQUIREMENT) -->
+                <div class="bg-gradient-to-r from-rose-500 to-amber-500 p-0.5 rounded-2xl shadow-md">
+                    <div class="bg-white p-5 rounded-[15px] flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">${t('reportProblem')}</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Facing check-in errors, wage difference, or need urgent advance loan? Raise a ticket directly to vendor admin.</p>
+                        </div>
+                        <button onclick="openComplaintModal()" class="w-full sm:w-auto px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-md transition shrink-0 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-headset"></i> ${t('reportProblem')}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Employee Complaint Tickets History -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-4 bg-slate-50 border-b border-slate-200 font-bold text-xs text-slate-700 uppercase tracking-wider">
+                        My Reported Issues & Support History
+                    </div>
+                    <div class="divide-y divide-slate-100 text-xs">
+                        ${store.state.complaints.filter(c => c.employeeId === emp.id).length === 0 ? '<div class="p-4 text-center text-slate-400">No issues reported yet.</div>' : ''}
+                        ${store.state.complaints.filter(c => c.employeeId === emp.id).map(c => `
+                            <div class="p-4 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-slate-900">${c.id}</span>
+                                        <span class="text-[10px] px-2 py-0.5 font-bold rounded bg-emerald-100 text-emerald-800">${c.status}</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400">${new Date(c.createdAt).toLocaleDateString()}</span>
+                                </div>
+                                <div class="font-semibold text-slate-800">${c.title}</div>
+                                <!-- Conversation replies -->
+                                <div class="space-y-1 pl-3 border-l-2 border-slate-200 mt-2">
+                                    ${c.messages.map(m => `
+                                        <div class="text-[11px] p-2 rounded-lg ${m.sender === 'admin' ? 'bg-slate-100 text-slate-800' : 'bg-emerald-50 text-emerald-900'}">
+                                            <strong>${m.sender === 'admin' ? 'Admin Reply' : 'You'}:</strong> ${m.text}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            return container;
+        }
+
+        // ==========================================
+        // 8. NOTIFICATION CENTER
+        // ==========================================
+
+        function renderNotificationsView() {
+            const container = document.createElement('div');
+            container.className = 'bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden max-w-3xl mx-auto space-y-0';
+
+            const userNotifs = store.state.notifications.filter(n => 
+                (store.currentUser?.role === 'admin' && n.recipientRole === 'admin') ||
+                (store.currentUser?.role === 'employee' && n.recipientRole === store.currentUser.data.id)
+            );
+
+            container.innerHTML = `
+                <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">${t('notifications')} Center</h3>
+                    <button onclick="markAllNotificationsRead()" class="text-xs text-emerald-600 font-bold hover:underline">Mark All Read</button>
+                </div>
+                <div class="divide-y divide-slate-100 text-xs">
+                    ${userNotifs.length === 0 ? '<div class="p-8 text-center text-slate-400">No notifications found.</div>' : ''}
+                    ${userNotifs.map(n => `
+                        <div class="p-4 flex items-start gap-3 hover:bg-slate-50 transition ${!n.read ? 'bg-emerald-50/40' : ''}">
+                            <div class="p-2 rounded-xl bg-slate-100 text-slate-600 mt-0.5">
+                                <i class="fa-solid fa-bell"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between">
+                                    <span class="font-bold text-slate-900">${n.title}</span>
+                                    <span class="text-[10px] text-slate-400">${n.timestamp}</span>
+                                </div>
+                                <p class="text-slate-600 mt-1">${n.message}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            return container;
+        }
+
+        function markAllNotificationsRead() {
+            store.state.notifications.forEach(n => n.read = true);
+            store.save();
+            renderApp();
+        }
+
+        // ==========================================
+        // 9. MODALS & FORMS
+        // ==========================================
+
+        function openComplaintModal() {
+            const modal = document.createElement('div');
+            modal.id = 'modalContainer';
+            modal.className = 'fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+                    <div class="flex justify-between items-center border-b pb-3 border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-900">${t('reportProblem')}</h3>
+                        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+                    <form onsubmit="event.preventDefault(); handleComplaintSubmit();" class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">${t('category')}</label>
+                            <select id="compCategory" required class="w-full p-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+                                <option>Check-in problem</option>
+                                <option>Check-out problem</option>
+                                <option>Attendance marked incorrectly</option>
+                                <option>Salary or daily wage problem</option>
+                                <option>Advance payment problem</option>
+                                <option>Leave request</option>
+                                <option>Other problem</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">${t('priority')}</label>
+                            <select id="compPriority" required class="w-full p-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+                                <option>Normal</option>
+                                <option>High</option>
+                                <option>Urgent</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Subject / Problem Title</label>
+                            <input type="text" id="compTitle" required placeholder="e.g. Check-out not recorded at 2 PM" class="w-full p-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">${t('description')}</label>
+                            <textarea id="compDesc" rows="3" required placeholder="Describe what happened in detail..." class="w-full p-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"></textarea>
+                        </div>
+                        <div class="pt-2 flex gap-2">
+                            <button type="button" onclick="closeModal()" class="w-1/2 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold">${t('cancel')}</button>
+                            <button type="submit" class="w-1/2 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold">${t('submit')}</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function handleComplaintSubmit() {
+            const category = document.getElementById('compCategory').value;
+            const priority = document.getElementById('compPriority').value;
+            const title = document.getElementById('compTitle').value;
+            const description = document.getElementById('compDesc').value;
+
+            store.submitComplaint({
+                employeeId: store.currentUser.data.id,
+                employeeName: store.currentUser.data.name,
+                category,
+                priority,
+                title,
+                description
+            });
+
+            closeModal();
+            alert('Complaint submitted successfully! Ticket saved to persistent database.');
+        }
+
+        function openRecordAdvanceModal(empId) {
+            const emp = store.state.employees.find(e => e.id === empId);
+            const modal = document.createElement('div');
+            modal.id = 'modalContainer';
+            modal.className = 'fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+                    <h3 class="text-sm font-bold text-slate-900">Record Advance Payment for ${emp.name}</h3>
+                    <form onsubmit="event.preventDefault(); handleAdvanceSubmit('${emp.id}');" class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Advance Amount (₹)</label>
+                            <input type="number" id="advAmount" required placeholder="e.g. 1000" class="w-full p-2 border border-slate-300 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Payment Mode</label>
+                            <select id="advMode" class="w-full p-2 border border-slate-300 rounded-xl">
+                                <option>UPI</option>
+                                <option>Cash</option>
+                                <option>Bank Transfer</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Note / Reason</label>
+                            <input type="text" id="advNote" placeholder="Emergency advance request" class="w-full p-2 border border-slate-300 rounded-xl">
+                        </div>
+                        <div class="pt-2 flex gap-2">
+                            <button type="button" onclick="closeModal()" class="w-1/2 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold">${t('cancel')}</button>
+                            <button type="submit" class="w-1/2 py-2 bg-slate-900 text-white rounded-xl font-bold">${t('submit')}</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function handleAdvanceSubmit(empId) {
+            const amt = document.getElementById('advAmount').value;
+            const mode = document.getElementById('advMode').value;
+            const note = document.getElementById('advNote').value;
+            store.addLedgerTransaction('Advance', empId, amt, mode, note);
+            closeModal();
+            alert('Advance recorded successfully!');
+        }
+
+        function openRecordWageModal(empId) {
+            const emp = store.state.employees.find(e => e.id === empId);
+            const fin = getEmployeeFinancials(empId);
+
+            const modal = document.createElement('div');
+            modal.id = 'modalContainer';
+            modal.className = 'fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+                    <h3 class="text-sm font-bold text-slate-900">Disburse Salary Wage to ${emp.name}</h3>
+                    <div class="p-3 bg-slate-50 border rounded-xl text-xs space-y-1">
+                        <div>Approved Gross Earned: <strong>₹${fin.gross}</strong></div>
+                        <div>Advance Loan Outstanding: <strong>₹${fin.advance}</strong></div>
+                        <div class="font-bold text-emerald-700">Net Payable Balance: ₹${fin.net}</div>
+                    </div>
+                    <form onsubmit="event.preventDefault(); handleWageDisburseSubmit('${emp.id}');" class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Disbursal Amount (₹)</label>
+                            <input type="number" id="wageAmount" value="${fin.net > 0 ? fin.net : 0}" required class="w-full p-2 border border-slate-300 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Disbursal Method</label>
+                            <select id="wageMode" class="w-full p-2 border border-slate-300 rounded-xl">
+                                <option>Bank Transfer</option>
+                                <option>UPI</option>
+                                <option>Cash</option>
+                            </select>
+                        </div>
+                        <div class="pt-2 flex gap-2">
+                            <button type="button" onclick="closeModal()" class="w-1/2 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold">${t('cancel')}</button>
+                            <button type="submit" class="w-1/2 py-2 bg-emerald-600 text-white rounded-xl font-bold">Confirm Disbursal</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function handleWageDisburseSubmit(empId) {
+            const amt = document.getElementById('wageAmount').value;
+            const mode = document.getElementById('wageMode').value;
+            store.addLedgerTransaction('WagePayment', empId, amt, mode, 'Wage payout disbursal');
+            closeModal();
+            alert('Wage payment recorded and slip generated!');
+        }
+
+        function openAddEmployeeModal() {
+            const modal = document.createElement('div');
+            modal.id = 'modalContainer';
+            modal.className = 'fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+                    <h3 class="text-sm font-bold text-slate-900">Add New Zepto Store Staff</h3>
+                    <form onsubmit="event.preventDefault(); handleAddEmployeeSubmit();" class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Full Name</label>
+                            <input type="text" id="newEmpName" required placeholder="e.g. Ramesh Kumar" class="w-full p-2 border border-slate-300 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Mobile Number</label>
+                            <input type="text" id="newEmpMobile" required placeholder="9876543210" class="w-full p-2 border border-slate-300 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Role</label>
+                            <select id="newEmpRole" class="w-full p-2 border border-slate-300 rounded-xl">
+                                <option>Picker</option>
+                                <option>Packer</option>
+                                <option>Rider</option>
+                                <option>Inventory Associate</option>
+                                <option>Shift Supervisor</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Assigned Shift</label>
+                            <select id="newEmpShift" class="w-full p-2 border border-slate-300 rounded-xl">
+                                <option>Morning (06:00 AM - 02:00 PM)</option>
+                                <option>Evening (02:00 PM - 10:00 PM)</option>
+                                <option>Night (10:00 PM - 06:00 AM)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Configured Daily Wage Rate (₹)</label>
+                            <input type="number" id="newEmpWage" value="700" required class="w-full p-2 border border-slate-300 rounded-xl">
+                        </div>
+                        <div class="pt-2 flex gap-2">
+                            <button type="button" onclick="closeModal()" class="w-1/2 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold">${t('cancel')}</button>
+                            <button type="submit" class="w-1/2 py-2 bg-slate-900 text-white rounded-xl font-bold">Add Staff Member</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function handleAddEmployeeSubmit() {
+            store.addEmployee({
+                name: document.getElementById('newEmpName').value,
+                mobile: document.getElementById('newEmpMobile').value,
+                role: document.getElementById('newEmpRole').value,
+                shift: document.getElementById('newEmpShift').value,
+                dailyWage: document.getElementById('newEmpWage').value
+            });
+            closeModal();
+            alert('New employee created! Employee ID generated automatically.');
+        }
+
+        function openAddStoreExpenseModal() {
+            const modal = document.createElement('div');
+            modal.id = 'modalContainer';
+            modal.className = 'fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+                    <h3 class="text-sm font-bold text-slate-900">Record Store Expense / Income</h3>
+                    <form onsubmit="event.preventDefault(); handleStorePnlSubmit();" class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Transaction Type</label>
+                            <select id="pnlType" class="w-full p-2 border border-slate-300 rounded-xl">
+                                <option value="Expense">Expense</option>
+                                <option value="Income">Income / Settlement</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Category & Title</label>
+                            <input type="text" id="pnlTitle" required placeholder="e.g. Packing Tapes or Zepto Payout" class="w-full p-2 border border-slate-300 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Amount (₹)</label>
+                            <input type="number" id="pnlAmount" required placeholder="500" class="w-full p-2 border border-slate-300 rounded-xl">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Mode</label>
+                            <select id="pnlMode" class="w-full p-2 border border-slate-300 rounded-xl">
+                                <option>UPI</option>
+                                <option>Cash</option>
+                                <option>Bank Transfer</option>
+                            </select>
+                        </div>
+                        <div class="pt-2 flex gap-2">
+                            <button type="button" onclick="closeModal()" class="w-1/2 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold">${t('cancel')}</button>
+                            <button type="submit" class="w-1/2 py-2 bg-slate-900 text-white rounded-xl font-bold">Save Record</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function handleStorePnlSubmit() {
+            const type = document.getElementById('pnlType').value;
+            const title = document.getElementById('pnlTitle').value;
+            const amt = document.getElementById('pnlAmount').value;
+            const mode = document.getElementById('pnlMode').value;
+            store.addStorePnl(type, 'General', title, amt, mode);
+            closeModal();
+            alert('Store cashflow record saved!');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modalContainer');
+            if (modal) modal.remove();
+        }
+
+        // CSV Export Utility
+        function exportEmployeesCsv() {
+            let csv = "Employee ID,Name,Mobile,Role,Shift,Daily Wage,Status\n";
+            store.state.employees.forEach(e => {
+                csv += `"${e.id}","${e.name}","${e.mobile}","${e.role}","${e.shift}",${e.dailyWage},"${e.status}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Zepto_Staff_Export_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+
+        function filterEmployeeList() {
+            const query = document.getElementById('empSearchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#empTableBody tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+
+        // Handle Hash Routing
+        window.addEventListener('hashchange', () => {
+            renderApp();
+        });
+
+        // Initialize on Window Load
+        window.onload = function() {
+            renderApp();
+        };
+    </script>
+    <script>if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(() => {})); }</script>
+</body>
+</html>
