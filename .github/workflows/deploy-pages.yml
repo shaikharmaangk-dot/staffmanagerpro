@@ -7,7 +7,7 @@ on:
 
 permissions:
   contents: read
-  pages: write
+  pages: read
   id-token: write
 
 concurrency:
@@ -23,10 +23,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Configure Pages and enable it if needed
+      - name: Configure Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
